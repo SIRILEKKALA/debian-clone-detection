@@ -1,24 +1,10 @@
-import requests
+import urllib.parse
 
 def search_code(pattern):
 
-    url = "https://codesearch.debian.net/search"
+    encoded = urllib.parse.quote(pattern)
 
-    params = {
-        "q": pattern
-    }
+    url = f"https://codesearch.debian.net/search?q={encoded}"
 
-    response = requests.get(url, params=params)
-
-    if response.status_code == 200:
-        print("Search successful\n")
-        print(response.text[:1000])  # show first part of results
-    else:
-        print("Search failed:", response.status_code)
-
-
-if __name__ == "__main__":
-
-    pattern = "strcpy"
-
-    search_code(pattern)
+    print("\nSearch Debian source for possible clones:")
+    print(url)

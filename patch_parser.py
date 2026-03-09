@@ -10,7 +10,7 @@ def extract_removed_lines(patch_file):
                 continue
 
             # capture removed lines
-            if line.startswith("-"):
+            if (line.startswith("-") or line.startswith("+")) and not line.startswith("---") and not line.startswith("+++"):
                 code = line[1:].strip()
 
                 # ignore empty lines
@@ -19,21 +19,19 @@ def extract_removed_lines(patch_file):
 
     return removed_lines
 
-
 def generate_regex_patterns(lines):
+
     patterns = []
 
     for line in lines:
-        # escape special regex characters
-        escaped = re.escape(line)
 
-        # allow flexible whitespace
-        pattern = re.sub(r"\s+", r"\\s+", escaped)
+        # extract meaningful identifiers
+        tokens = re.findall(r"[A-Za-z_]{5,}", line)
 
-        patterns.append(pattern)
+        if tokens:
+            patterns.append(tokens[0])
 
     return patterns
-
 
 if __name__ == "__main__":
 
