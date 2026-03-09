@@ -1,34 +1,54 @@
 import re
 
 def extract_removed_lines(patch_file):
-    removed = []
+    removed_lines = []
 
-    with open(patch_file, "r") as f:
+    with open(patch_file, "r", encoding="utf-8", errors="ignore") as f:
         for line in f:
-            if line.startswith("-") and not line.startswith("---"):
-                removed.append(line[1:].strip())
+            # skip patch metadata
+            if line.startswith("---") or line.startswith("+++") or line.startswith("@@"):
+                continue
 
-    return removed
+            # capture removed lines
+            if line.startswith("-"):
+                code = line[1:].strip()
+
+                # ignore empty lines
+                if code:
+                    removed_lines.append(code)
+
+    return removed_lines
 
 
-def generate_regex(lines):
+def generate_regex_patterns(lines):
     patterns = []
-    for l in lines:
-        pattern = re.escape(l)
+
+    for line in lines:
+        # escape special regex characters
+        escaped = re.escape(line)
+
+        # allow flexible whitespace
+        pattern = re.sub(r"\s+", r"\\s+", escaped)
+
         patterns.append(pattern)
 
     return patterns
 
 
 if __name__ == "__main__":
-    patch = "example_patch.diff"
 
-    removed = extract_removed_lines(patch)
+    patch_file = "example_patch.diff"
 
-    print("Removed lines:")
+    removed = extract_removed_lines(patch_file)
+
+    print("Removed vulnerable lines:\n")
+
     for r in removed:
         print(r)
 
-    print("\nGenerated regex patterns:")
-    for p in generate_regex(removed):
+    print("\nGenerated regex patterns:\n")
+
+    patterns = generate_regex_patterns(removed)
+
+    for p in patterns:
         print(p)
